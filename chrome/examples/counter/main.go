@@ -12,7 +12,7 @@ import (
 	"runtime"
 	"sync"
 
-	chomeui "github.com/multiverse-os/chromeui"
+	chome "github.com/multiverse-os/framekit/chrome"
 )
 
 // Go types that are bound to the UI must be thread-safe, because each binding
@@ -40,7 +40,7 @@ func main() {
 	if runtime.GOOS == "linux" {
 		args = append(args, "--class=ChromeUI")
 	}
-	ui, err := chomeui.New("", "", 480, 320, args...)
+	ui, err := chome.New("", "", 480, 320, args...)
 	if err != nil {
 		log.Fatal(err)
 	}

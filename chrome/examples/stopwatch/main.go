@@ -7,11 +7,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	chromeui "github.com/multiverse-os/chromeui"
+	chrome "github.com/multiverse-os/chrome"
 )
 
 func main() {
-	ui, err := chomeui.New("", "", 480, 320)
+	ui, err := chrome.New("", "", 480, 320)
 	if err != nil {
 		log.Fatal(err)
 	}

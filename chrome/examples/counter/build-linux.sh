@@ -1,6 +1,6 @@
 #!/bin/sh
 
-APP=chromeui-example
+APP=chrome-example
 APPDIR=${APP}_1.0.0
 
 mkdir -p $APPDIR/usr/bin

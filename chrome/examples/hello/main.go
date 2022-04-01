@@ -4,13 +4,13 @@ import (
 	"log"
 	"net/url"
 
-	chromeui "github.com/multiverse-os/chromeui"
+	chrome "github.com/multiverse-os/framekit/chrome"
 )
 
 func main() {
 	// Create UI with basic HTML passed via data URI
 
-	ui, err := chromeui.New("data:text/html,"+url.PathEscape(`
+	ui, err := chrome.New("data:text/html,"+url.PathEscape(`
 	<html>
 		<head>
 			<title>Hello</title>
