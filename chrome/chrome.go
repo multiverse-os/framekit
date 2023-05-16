@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
 	"os/exec"
-	"regexp"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -57,7 +55,7 @@ func newChromeWithArgs(chromeBinary string, args ...string) (*chrome, error) {
 
 	// Start chrome process
 	c.cmd = exec.Command(chromeBinary, args...)
-	pipe, err := c.cmd.StderrPipe()
+	stderr, err := c.cmd.StderrPipe()
 	if err != nil {
 		return nil, err
 	}
@@ -66,13 +64,25 @@ func newChromeWithArgs(chromeBinary string, args ...string) (*chrome, error) {
 	}
 
 	// Wait for websocket address to be printed to stderr
-	re := regexp.MustCompile(`^DevTools listening on (ws://.*?)\r?\n$`)
-	m, err := readUntilMatch(pipe, re)
-	if err != nil {
-		c.kill()
-		return nil, err
+	//re := regexp.MustCompile(`^DevTools listening on (wss://.*?)\r?\n$`)
+	//m, err := readUntilMatch(pipe, re)
+	//if err != nil {
+	//	c.kill()
+	//	return nil, err
+	//}
+	//wsURL := m[1]
+
+	buf := bufio.NewReader(stderr)
+	var wsURL string
+	for i := 0; i <= 10; i++ {
+		line, _, _ := buf.ReadLine()
+		outputLine := string(line)
+		fmt.Printf("line(%v)\n", outputLine)
+		if ok := strings.HasPrefix(outputLine, "DevTools "); ok {
+			fmt.Printf("outputLine(%v)\n", outputLine)
+			wsURL = outputLine[22:]
+		}
 	}
-	wsURL := m[1]
 
 	// Open a websocket
 	c.ws, err = websocket.Dial(wsURL, "", "http://127.0.0.1")
@@ -317,7 +327,7 @@ func (c *chrome) readLoop() {
 				continue
 			}
 
-			c.disableJavascript(true)
+			c.disableJavascript(false)
 			if res.Error.Message != "" {
 				resc <- result{Err: errors.New(res.Error.Message)}
 			} else if res.Result.Exception.Exception.Value != nil {
@@ -522,18 +532,19 @@ func (c *chrome) kill() error {
 	return nil
 }
 
-func readUntilMatch(r io.ReadCloser, re *regexp.Regexp) ([]string, error) {
-	br := bufio.NewReader(r)
-	for {
-		if line, err := br.ReadString('\n'); err != nil {
-			r.Close()
-			return nil, err
-		} else if m := re.FindStringSubmatch(line); m != nil {
-			go io.Copy(ioutil.Discard, br)
-			return m, nil
-		}
-	}
-}
+// TODO: THIS FUNCTION SUCKKKKS
+//func readUntilMatch(r io.ReadCloser, re *regexp.Regexp) ([]string, error) {
+//	br := bufio.NewReader(r)
+//	for {
+//		if line, err := br.ReadString('\n'); err != nil {
+//			r.Close()
+//			return nil, err
+//		} else if m := re.FindStringSubmatch(line); m != nil {
+//			go io.Copy(ioutil.Discard, br)
+//			return m, nil
+//		}
+//	}
+//}
 
 func contains(arr []string, x string) bool {
 	for _, n := range arr {

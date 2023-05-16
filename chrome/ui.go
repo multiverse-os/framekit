@@ -27,6 +27,7 @@ type ui struct {
 }
 
 var defaultChromeArgs = []string{
+	"--remote-allow-origins=*",
 	"--disable-background-networking",
 	"--disable-background-timer-throttling",
 	"--disable-backgrounding-occluded-windows",
